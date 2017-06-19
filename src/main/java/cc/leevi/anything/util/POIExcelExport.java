@@ -1,13 +1,20 @@
 package cc.leevi.anything.util;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -120,8 +127,7 @@ public class POIExcelExport {
     public void wirteExcel(String titleColumn[],String titleName[],List<?> dataList,OutputStream ops){
         //添加Worksheet（不添加sheet时生成的xls文件打开时会报错)
         Sheet sheet = workbook.createSheet(this.sheetName);
-        CreationHelper helper = workbook.getCreationHelper();
-        Drawing drawing = sheet.createDrawingPatriarch();
+        Drawing<?> patriarch = sheet.createDrawingPatriarch();
         //新建文件
         try {
             //写入excel的表头
@@ -132,10 +138,17 @@ public class POIExcelExport {
             titleStyle = (HSSFCellStyle) setColor(titleStyle, titleBackColor, (short)10);
 
             for(int i = 0;i < titleName.length;i++){
-                sheet.setColumnWidth(i, 12*256);    //设置宽度
-                Cell cell = titleNameRow.createCell(i);
-                cell.setCellStyle(titleStyle);
-                cell.setCellValue(titleName[i].toString());
+                if("图片".equals(titleName[i])){
+                    sheet.setColumnWidth(i, 80*256);    //设置宽度
+                    Cell cell = titleNameRow.createCell(i);
+                    cell.setCellStyle(titleStyle);
+                    cell.setCellValue(titleName[i].toString());
+                }else{
+                    sheet.setColumnWidth(i, 12*256);    //设置宽度
+                    Cell cell = titleNameRow.createCell(i);
+                    cell.setCellStyle(titleStyle);
+                    cell.setCellValue(titleName[i].toString());
+                }
             }
 
             //为表头添加自动筛选
@@ -149,13 +162,13 @@ public class POIExcelExport {
                 //设置样式
                 HSSFCellStyle dataStyle = workbook.createCellStyle();
                 titleStyle = (HSSFCellStyle) setFontAndBorder(titleStyle, contentFontType, (short) contentFontSize);
-
                 if(titleColumn.length>0){
                     for(int rowIndex = 1;rowIndex<=dataList.size();rowIndex++){
                         Object obj = dataList.get(rowIndex-1);     //获得该对象
                         Class clsss = obj.getClass();     //获得该对对象的class实例
                         Row dataRow = workbook.getSheet(sheetName).createRow(rowIndex);
-                        dataRow.setHeight((short) 120);
+                        //px = height / 20
+                        dataRow.setHeight((short) 2400);
                         for(int columnIndex = 0;columnIndex<titleColumn.length;columnIndex++){
                             String title = titleColumn[columnIndex].toString().trim();
                             if(!"".equals(title)){  //字段不为空
@@ -172,16 +185,23 @@ public class POIExcelExport {
 
 
                                 if(title.equals("images")){
+                                    Cell cell = dataRow.createCell(columnIndex);
                                     List<String> images = (List<String>) method.invoke(obj);
-                                    for(String image : images){
-                                        ClientAnchor anchor = helper.createClientAnchor();
-                                        anchor.setCol1(columnIndex);
-                                        anchor.setRow1(rowIndex);
-                                        Picture pict = drawing.createPicture(anchor, HSSFWorkbook.PICTURE_TYPE_JPEG);
-                                        pict.resize();
-                                    }
-                                }else if(title.equals("title")){
+                                    BufferedImage wrap = imageJoin(images);
+                                    if(wrap!=null){
+                                        HSSFClientAnchor anchor = new HSSFClientAnchor(0, 0, 0, 0, (short) columnIndex, rowIndex, (short) (columnIndex+1),rowIndex+1);
+                                        anchor.setAnchorType(ClientAnchor.AnchorType.DONT_MOVE_AND_RESIZE);
+                                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                                        try{
+                                            ImageIO.write(wrap,"JPG",baos);
+                                            patriarch.createPicture(anchor, workbook.addPicture(baos.toByteArray(),HSSFWorkbook.PICTURE_TYPE_JPEG));
+                                        }catch (Exception e){
+                                            e.printStackTrace();
+                                        }finally {
+                                            baos.close();
+                                        }
 
+                                    }
                                 }else{
                                     String data = method.invoke(obj)==null?"":method.invoke(obj).toString();
                                     Cell cell = dataRow.createCell(columnIndex);
@@ -260,4 +280,34 @@ public class POIExcelExport {
         style.setBorderRight(CellStyle.BORDER_THIN);//右边框
         return style;
     }
+
+    public BufferedImage imageJoin(List<String> images){
+        int width = 0;
+        int defaultWidth = 450;
+        int defaultHeight = 104;
+        List<BufferedImage> cacheImages = new ArrayList<>();
+        try{
+            for(String image : images){
+                BufferedImage bufferedImage = ImageIO.read(new URL(image));
+                cacheImages.add(bufferedImage);
+                width += bufferedImage.getWidth();
+            }
+            if(width!=0){
+                BufferedImage wrap = new BufferedImage(width,
+                        defaultHeight, BufferedImage.TYPE_INT_RGB);
+                Graphics2D g = wrap.createGraphics();
+                int offsetX = 0;
+                for(BufferedImage original : cacheImages){
+                    g.drawImage(original,offsetX,0,original.getWidth(),defaultHeight,null);
+                    offsetX += original.getWidth();
+                }
+                g.dispose();
+                return wrap;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }
