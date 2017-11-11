@@ -6,7 +6,7 @@
     <groupId>cc.leevi</groupId>
     <artifactId>anything</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
 
     <name>anything</name>
     <description>anything</description>
@@ -104,8 +104,37 @@
         <finalName>anything</finalName>
         <plugins>
             <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>appassembler-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <configuration>
+                    <!-- 生成linux, windows两种平台的执行脚本 -->
+                    <platforms>all</platforms>
+                    <!-- 根目录 -->
+                    <assembleDirectory>target/assemble</assembleDirectory>
+                    <!-- 打包的jar，以及maven依赖的jar放到这个目录里面 -->
+                    <repositoryName>lib</repositoryName>
+                    <!-- 可执行脚本的目录 -->
+                    <binFolder>bin</binFolder>
+                    <!-- 配置文件的目标目录 -->
+                    <!--<configurationDirectory>conf</configurationDirectory>-->
+                    <!-- 拷贝配置文件到上面的目录中 -->
+                    <!--<copyConfigurationDirectory>true</copyConfigurationDirectory>-->
+                    <!-- 从哪里拷贝配置文件 (默认src/main/config) -->
+                    <configurationSourceDirectory>src/main/resources</configurationSourceDirectory>
+                    <includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
+
+                    <!-- lib目录中jar的存放规则，默认是${groupId}/${artifactId}的目录格式，flat表示直接把jar放到lib目录 -->
+                    <repositoryLayout>flat</repositoryLayout>
+                    <logsDirectory>logs</logsDirectory>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <programs>
+                        <program>
+                            <!-- 启动类 -->
+                            <mainClass>cc.leevi.anything.AnythingApplication</mainClass>
+                        </program>
+                    </programs>
+                </configuration>
             </plugin>
             <!--<plugin>-->
                 <!--<groupId>org.mybatis.generator</groupId>-->

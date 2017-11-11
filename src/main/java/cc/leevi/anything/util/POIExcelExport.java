@@ -189,12 +189,11 @@ public class POIExcelExport {
                                     List<String> images = (List<String>) method.invoke(obj);
                                     BufferedImage wrap = imageJoin(images);
                                     if(wrap!=null){
-                                        HSSFClientAnchor anchor = new HSSFClientAnchor(0, 0, 0, 0, (short) columnIndex, rowIndex, (short) (columnIndex+1),rowIndex+1);
-                                        anchor.setAnchorType(ClientAnchor.AnchorType.DONT_MOVE_AND_RESIZE);
+                                        HSSFClientAnchor anchor = new HSSFClientAnchor(70, 10, 0, 0, (short) columnIndex, rowIndex, (short) (columnIndex+1),rowIndex+1);
                                         ByteArrayOutputStream baos = new ByteArrayOutputStream();
                                         try{
                                             ImageIO.write(wrap,"JPG",baos);
-                                            patriarch.createPicture(anchor, workbook.addPicture(baos.toByteArray(),HSSFWorkbook.PICTURE_TYPE_JPEG));
+                                            patriarch.createPicture(anchor, workbook.addPicture(baos.toByteArray(),HSSFWorkbook.PICTURE_TYPE_JPEG)).resize(1);
                                         }catch (Exception e){
                                             e.printStackTrace();
                                         }finally {

@@ -28,12 +28,12 @@ public class ExportService {
             POIExcelExport poiExcelExport = new POIExcelExport();
             if(CollectionUtils.isNotEmpty(vivoDayDataList)){
                 if(StringUtils.isNotEmpty(vivoDayDataList.get(0).getTitle())){
-                    String titleColumn[] = {"plan","ad","title","images","date","showCount","clickCount","clickRate","clickPrice","spent"};
-                    String titleName[] = {"所在计划","广告","标题","图片","日期","曝光量","点击量","点击率","点击单价","总花费"};
+                    String titleColumn[] = {"plan","ad","title","images","date","downloadCount","showCount","clickCount","clickRate","clickPrice","spent"};
+                    String titleName[] = {"所在计划","广告","标题","图片","日期","下载量","曝光量","点击量","点击率","点击单价","总花费"};
                     poiExcelExport.wirteExcel(titleColumn,titleName,vivoDayDataList,baos);
                 }else{
-                    String titleColumn[] = {"plan","ad","date","showCount","clickCount","clickRate","clickPrice","spent"};
-                    String titleName[] = {"所在计划","广告","日期","曝光量","点击量","点击率","点击单价","总花费"};
+                    String titleColumn[] = {"plan","ad","date","downloadCount","showCount","clickCount","clickRate","clickPrice","spent"};
+                    String titleName[] = {"所在计划","广告","日期","下载量","曝光量","点击量","点击率","点击单价","总花费"};
                     poiExcelExport.wirteExcel(titleColumn,titleName,vivoDayDataList,baos);
                 }
                 String url = qiniuHelper.uploadExcel(baos.toByteArray());

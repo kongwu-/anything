@@ -16,6 +16,7 @@ public class VivoDayData {
     private Double clickRate;
     private Double clickPrice;
     private Double spent;
+    private int downloadCount;
 
     public String getPlan() {
         return plan;
@@ -95,5 +96,13 @@ public class VivoDayData {
 
     public void setImages(List<String> images) {
         this.images = images;
+    }
+
+    public int getDownloadCount() {
+        return downloadCount;
+    }
+
+    public void setDownloadCount(int downloadCount) {
+        this.downloadCount = downloadCount;
     }
 }
