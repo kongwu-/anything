@@ -16,7 +16,11 @@ public class Response<T> implements Serializable{
         this.msg = CodeMapping.SUCCESS.getMsg();
         this.code = CodeMapping.SUCCESS.getCode();
     }
-
+    public Response(T data) {
+        this.msg = CodeMapping.SUCCESS.getMsg();
+        this.code = CodeMapping.SUCCESS.getCode();
+        this.data = data;
+    }
     public static Response error(){
         Response response = new Response();
         response.setMsg(CodeMapping.ERROR.getMsg());

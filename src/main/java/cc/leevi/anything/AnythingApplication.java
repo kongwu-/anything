@@ -24,4 +24,5 @@ public class AnythingApplication {
 		HttpMessageConverter<?> converter = fastConverter;
 		return new HttpMessageConverters(converter);
 	}
+
 }
